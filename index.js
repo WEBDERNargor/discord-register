@@ -19,6 +19,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID; // ใช้ Server ID ที่คุณได้จากขั้นตอนข้างต้น
 const CHANNEL_ID = process.env.CHANNEL_ID; // เจาะจง Channel ID ที่ต้องการ
 const ROLE_ID = process.env.ROLE_ID; // เจาะจง Role ID ที่ต้องการมอบให้ผู้ใช้
+const ADMIN_LOG_CHANNEL_ID = process.env.ADMIN_LOG_CHANNEL_ID; // เจาะจง Channel ID ที่ใช้สำหรับ log
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -105,19 +106,19 @@ client.on('modalSubmit', async (modal) => {
         const guild = client.guilds.cache.get(GUILD_ID);
         const member = guild.members.cache.get(modal.user.id);
         const role = guild.roles.cache.get(ROLE_ID);
-        setTimeout(async ()=>{
-        await modal.followUp({ content: `กำลังเพิ่มยศรอสักครู่...`, ephemeral: true });
-        },3000);
-        setTimeout(async ()=>{
-            
-            if (member && role) {
-                await member.roles.add(role);
-                await modal.followUp({ content: `เพิ่มยศเรียบร้อย`, ephemeral: true });
-            } else {
-                await modal.followUp({ content: `เพิ่มยศผิดพลาด.`, ephemeral: true });
-            }
-        },10000);
-     
+
+        if (member && role) {
+            await member.roles.add(role);
+            await modal.followUp({ content: `You have been given the role!`, ephemeral: true });
+        } else {
+            await modal.followUp({ content: `There was an error assigning the role.`, ephemeral: true });
+        }
+
+        // ส่ง log การลงทะเบียนไปยังช่องแชทสำหรับแอดมิน
+        const logChannel = guild.channels.cache.get(ADMIN_LOG_CHANNEL_ID);
+        if (logChannel) {
+            logChannel.send(`New registration:\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}\nUser: <@${modal.user.id}>`);
+        }
     }
 });
 
