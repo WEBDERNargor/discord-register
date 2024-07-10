@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const { Modal, TextInputComponent, showModal } = require('discord-modals'); // Importing classes from discord-modals
 
 const client = new Client({
@@ -23,69 +23,58 @@ const ADMIN_LOG_CHANNEL_ID = process.env.ADMIN_LOG_CHANNEL_ID; // เจาะ�
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    sendRegisterButton();
 });
 
-const commands = [{
-    name: 'register',
-    description: 'Open registration form'
-}];
+const sendRegisterButton = () => {
+    const channel = client.channels.cache.get(CHANNEL_ID);
+    if (!channel) return console.error("Channel not found");
 
-const rest = new REST({ version: '10' }).setToken(TOKEN);
+    const button = new ButtonBuilder()
+        .setCustomId('register-button')
+        .setLabel('Register')
+        .setStyle(ButtonStyle.Primary);
 
-(async () => {
-    try {
-        console.log('Started refreshing application (/) commands.');
+    const row = new ActionRowBuilder().addComponents(button);
 
-        await rest.put(
-            Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-            { body: commands },
-        );
-
-        console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
-})();
+    channel.send({
+        content: 'Click the button below to register:',
+        components: [row]
+    });
+};
 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
+    if (interaction.isButton()) {
+        if (interaction.customId === 'register-button') {
+            const modal = new Modal() // We create a Modal
+                .setCustomId('registration-modal')
+                .setTitle('Registration Form')
+                .addComponents(
+                    new TextInputComponent()
+                        .setCustomId('first-name')
+                        .setLabel('First Name')
+                        .setStyle('SHORT')
+                        .setPlaceholder('Enter your first name')
+                        .setRequired(true),
+                    new TextInputComponent()
+                        .setCustomId('last-name')
+                        .setLabel('Last Name')
+                        .setStyle('SHORT')
+                        .setPlaceholder('Enter your last name')
+                        .setRequired(true),
+                    new TextInputComponent()
+                        .setCustomId('favorite-song')
+                        .setLabel('Favorite Song')
+                        .setStyle('SHORT')
+                        .setPlaceholder('Enter your favorite song')
+                        .setRequired(true)
+                );
 
-    const { commandName, channelId } = interaction;
-
-    // ตรวจสอบว่า interaction มาจาก channel ที่ถูกต้อง
-    if (channelId !== CHANNEL_ID) {
-        return interaction.reply({ content: 'You can only use this command in the specified channel.', ephemeral: true });
-    }
-
-    if (commandName === 'register') {
-        const modal = new Modal() // We create a Modal
-            .setCustomId('registration-modal')
-            .setTitle('Registration Form')
-            .addComponents(
-                new TextInputComponent()
-                    .setCustomId('first-name')
-                    .setLabel('First Name')
-                    .setStyle('SHORT')
-                    .setPlaceholder('Enter your first name')
-                    .setRequired(true),
-                new TextInputComponent()
-                    .setCustomId('last-name')
-                    .setLabel('Last Name')
-                    .setStyle('SHORT')
-                    .setPlaceholder('Enter your last name')
-                    .setRequired(true),
-                new TextInputComponent()
-                    .setCustomId('favorite-song')
-                    .setLabel('Favorite Song')
-                    .setStyle('SHORT')
-                    .setPlaceholder('Enter your favorite song')
-                    .setRequired(true)
-            );
-
-        showModal(modal, {
-            client: client,
-            interaction: interaction // Pass the Interaction to show the modal with that interaction data
-        });
+            showModal(modal, {
+                client: client,
+                interaction: interaction // Pass the Interaction to show the modal with that interaction data
+            });
+        }
     }
 });
 
