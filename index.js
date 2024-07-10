@@ -7,7 +7,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.MessageReactions,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildMembers
     ]
 });
@@ -18,6 +18,7 @@ const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID; // ใช้ Server ID ที่คุณได้จากขั้นตอนข้างต้น
 const CHANNEL_ID = process.env.CHANNEL_ID; // เจาะจง Channel ID ที่ต้องการ
+const ROLE_ID = process.env.ROLE_ID; // เจาะจง Role ID ที่ต้องการมอบให้ผู้ใช้
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -93,9 +94,30 @@ client.on('modalSubmit', async (modal) => {
         const lastName = modal.getTextInputValue('last-name');
         const favoriteSong = modal.getTextInputValue('favorite-song');
 
-        await modal.reply(`Thank you for registering!\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}`);
+        await modal.deferReply({ ephemeral: true });
 
-        // Here you can save the data to a database or file
+        await modal.followUp({
+            content: `Thank you for registering!\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}`,
+            ephemeral: true
+        });
+
+        // เพิ่ม role ให้กับผู้ใช้
+        const guild = client.guilds.cache.get(GUILD_ID);
+        const member = guild.members.cache.get(modal.user.id);
+        const role = guild.roles.cache.get(ROLE_ID);
+        setTimeout(async ()=>{
+        await modal.followUp({ content: `กำลังเพิ่มยศรอสักครู่...`, ephemeral: true });
+        },3000);
+        setTimeout(async ()=>{
+            
+            if (member && role) {
+                await member.roles.add(role);
+                await modal.followUp({ content: `เพิ่มยศเรียบร้อย`, ephemeral: true });
+            } else {
+                await modal.followUp({ content: `เพิ่มยศผิดพลาด.`, ephemeral: true });
+            }
+        },10000);
+     
     }
 });
 
