@@ -32,13 +32,13 @@ const sendRegisterButton = () => {
 
     const button = new ButtonBuilder()
         .setCustomId('register-button')
-        .setLabel('Register')
+        .setLabel('ลงทะเบียน')
         .setStyle(ButtonStyle.Primary);
 
     const row = new ActionRowBuilder().addComponents(button);
 
     channel.send({
-        content: 'Click the button below to register:',
+        content: 'คลิกปุ่มล่างนี้เพื่อลงทะเบียน',
         components: [row]
     });
 };
@@ -48,24 +48,24 @@ client.on('interactionCreate', async interaction => {
         if (interaction.customId === 'register-button') {
             const modal = new Modal() // We create a Modal
                 .setCustomId('registration-modal')
-                .setTitle('Registration Form')
+                .setTitle('ลงทะเเบียนไวริส')
                 .addComponents(
                     new TextInputComponent()
                         .setCustomId('first-name')
-                        .setLabel('First Name')
+                        .setLabel('ชื่อจริง')
                         .setStyle('SHORT')
                         .setPlaceholder('Enter your first name')
                         .setRequired(true),
                     new TextInputComponent()
                         .setCustomId('last-name')
-                        .setLabel('Last Name')
+                        .setLabel('นามสกุล')
                         .setStyle('SHORT')
                         .setPlaceholder('Enter your last name')
                         .setRequired(true),
                     new TextInputComponent()
                         .setCustomId('favorite-song')
-                        .setLabel('Favorite Song')
-                        .setStyle('SHORT')
+                        .setLabel('เพลงที่ชอบ')
+                        .setStyle('PARAGRAPH')
                         .setPlaceholder('Enter your favorite song')
                         .setRequired(true)
                 );
