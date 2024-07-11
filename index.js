@@ -3,14 +3,9 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes, ButtonBuilder, ActionRowBuilder, ButtonStyle, TextInputStyle } = require('discord.js'); // Importing TextInputStyle from discord.js
 const { Modal, TextInputComponent, showModal } = require('discord-modals'); // Importing classes from discord-modals
 
-
-
 const mysql = require('mysql2');
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'nargorbot',
-  });
+
+
 
 const client = new Client({
     intents: [
@@ -29,7 +24,9 @@ const GUILD_ID = process.env.GUILD_ID; // ใช้ Server ID ที่คุณ
 const CHANNEL_ID = process.env.CHANNEL_ID; // เจาะจง Channel ID ที่ต้องการ
 const ROLE_ID = process.env.ROLE_ID; // เจาะจง Role ID ที่ต้องการมอบให้ผู้ใช้
 const ADMIN_LOG_CHANNEL_ID = process.env.ADMIN_LOG_CHANNEL_ID; // เจาะจง Channel ID ที่ใช้สำหรับ log
+const mysql=JSON.parse(process.env.MYSQL);
 
+const connection = mysql.createConnection(mysql);
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     sendRegisterButton();
