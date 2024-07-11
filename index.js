@@ -1,6 +1,16 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+
+const { Client, GatewayIntentBits, REST, Routes, ButtonBuilder, ActionRowBuilder, ButtonStyle, TextInputStyle } = require('discord.js'); // Importing TextInputStyle from discord.js
 const { Modal, TextInputComponent, showModal } = require('discord-modals'); // Importing classes from discord-modals
+
+
+
+const mysql = require('mysql2');
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    database: 'nargorbot',
+  });
 
 const client = new Client({
     intents: [
@@ -15,7 +25,6 @@ const discordModals = require('discord-modals'); // Initializing discord-modals
 discordModals(client); // Pass the client to the discord-modals
 
 const TOKEN = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID; // ใช้ Server ID ที่คุณได้จากขั้นตอนข้างต้น
 const CHANNEL_ID = process.env.CHANNEL_ID; // เจาะจง Channel ID ที่ต้องการ
 const ROLE_ID = process.env.ROLE_ID; // เจาะจง Role ID ที่ต้องการมอบให้ผู้ใช้
@@ -48,25 +57,31 @@ client.on('interactionCreate', async interaction => {
         if (interaction.customId === 'register-button') {
             const modal = new Modal() // We create a Modal
                 .setCustomId('registration-modal')
-                .setTitle('ลงทะเเบียนไวริส')
+                .setTitle('ลงทะเบียนไวริส')
                 .addComponents(
                     new TextInputComponent()
                         .setCustomId('first-name')
                         .setLabel('ชื่อจริง')
-                        .setStyle('SHORT')
+                        .setStyle(TextInputStyle.Short) // Corrected to use TextInputStyle from discord.js
                         .setPlaceholder('Enter your first name')
                         .setRequired(true),
                     new TextInputComponent()
                         .setCustomId('last-name')
                         .setLabel('นามสกุล')
-                        .setStyle('SHORT')
+                        .setStyle(TextInputStyle.Short) // Corrected to use TextInputStyle from discord.js
                         .setPlaceholder('Enter your last name')
                         .setRequired(true),
-                    new TextInputComponent()
+                        new TextInputComponent()
                         .setCustomId('favorite-song')
                         .setLabel('เพลงที่ชอบ')
-                        .setStyle('PARAGRAPH')
+                        .setStyle(TextInputStyle.Short) // Corrected to use TextInputStyle from discord.js
                         .setPlaceholder('Enter your favorite song')
+                        .setRequired(true),
+                    new TextInputComponent()
+                        .setCustomId('detail-input')
+                        .setLabel('เหตุผลที่เข้ามา')
+                        .setStyle(TextInputStyle.Paragraph) // Corrected to use TextInputStyle from discord.js
+                        .setPlaceholder('Enter your Reason coming')
                         .setRequired(true)
                 );
 
@@ -83,14 +98,14 @@ client.on('modalSubmit', async (modal) => {
         const firstName = modal.getTextInputValue('first-name');
         const lastName = modal.getTextInputValue('last-name');
         const favoriteSong = modal.getTextInputValue('favorite-song');
+        const reason=modal.getTextInputValue('detail-input');
 
         await modal.deferReply({ ephemeral: true });
 
         await modal.followUp({
-            content: `Thank you for registering!\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}`,
+            content: `Thank you for registering!\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}\nReason coming: ${reason}`,
             ephemeral: true
         });
-
         // เพิ่ม role ให้กับผู้ใช้
         const guild = client.guilds.cache.get(GUILD_ID);
         const member = guild.members.cache.get(modal.user.id);
@@ -106,7 +121,15 @@ client.on('modalSubmit', async (modal) => {
         // ส่ง log การลงทะเบียนไปยังช่องแชทสำหรับแอดมิน
         const logChannel = guild.channels.cache.get(ADMIN_LOG_CHANNEL_ID);
         if (logChannel) {
-            logChannel.send(`New registration:\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}\nUser: <@${modal.user.id}>`);
+            logChannel.send(`New registration:\nName: ${firstName}\nLast Name: ${lastName}\nFavorite Song: ${favoriteSong}\nReason coming: ${reason}\nUser: <@${modal.user.id}>`);
+            connection.query(
+                'INSERT INTO member (fname,lname,song,reason)VALUES(?,?,?,?);',
+                [firstName, lastName,favoriteSong,reason],
+                function (err, results) {
+                
+                }
+              );
+            console.log("register success full");
         }
     }
 });
