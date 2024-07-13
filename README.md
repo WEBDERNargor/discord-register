@@ -1,7 +1,5 @@
-
-# Bot ลงทะเบียน Discord MySql
-
-บอทดิสคอร์ดระบบลงทะเบียนเชื่อมต่อฐานข้อมูล MySql
+# Discord bot, registration system connected to MySql database
+Discord bot, registration system connected to MySql database
 
 
 ## Authors
@@ -18,4 +16,6 @@ Install discord-register with npm
   npm install
   npm run start
 ```
+Rename example.env to .env and add all the values ​​in .env
+    
     
