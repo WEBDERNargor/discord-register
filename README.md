@@ -16,5 +16,5 @@ Install discord-register with npm
   npm install
   npm run start
 ```
-Rename example.env to .env and add all the values ​​in .env .\n
+Rename example.env to .env and add all the values ​​in .env .
 We have a database for you to use with the file name init.sql .
